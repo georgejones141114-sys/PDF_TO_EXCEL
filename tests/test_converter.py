@@ -47,6 +47,17 @@ def test_market_stats_values(sample_pdf_bytes):
     assert stats["Bond market today (FRW)"] == 1717401000
 
 
+def test_bond_coupon_rates_are_numeric(sample_pdf_bytes):
+    xlsx_bytes = convert(sample_pdf_bytes)
+    wb = openpyxl.load_workbook(io.BytesIO(xlsx_bytes))
+    ws = wb["BONDS_GOV+CORP"]
+
+    coupon_values = [row[1] for row in ws.iter_rows(values_only=True, min_row=2)]
+
+    assert coupon_values
+    assert all(isinstance(value, (int, float)) for value in coupon_values)
+
+
 def test_weekly_report_total(sample_pdf_bytes):
     xlsx_bytes = convert(sample_pdf_bytes)
     wb = openpyxl.load_workbook(io.BytesIO(xlsx_bytes))

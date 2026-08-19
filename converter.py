@@ -61,6 +61,13 @@ def _num(s):
         return s
 
 
+def _coupon_rate(s):
+    """Convert a bond coupon rate such as ``11.00%`` to a numeric value."""
+    if isinstance(s, str) and s.strip().endswith("%"):
+        return _num(s.strip()[:-1])
+    return _num(s)
+
+
 def _write_sheet(wb, name, headers, rows, numeric_cols):
     ws = wb.create_sheet(name)
     ws.sheet_view.showGridLines = False
@@ -295,9 +302,9 @@ def convert(pdf_bytes: bytes, source_filename="", added_at=None) -> bytes:
 
     # BONDS_GOV+CORP
     bond_headers = ["BOND", "COUPON RATE", "CLOSE. PRICE", "PREV. PRICE", "BOND TRADED"]
-    gov_filtered = [[_combine_security_status(row), row[4], row[5], row[6], row[9]] for row in gov_rows]
-    corp_filtered = [[_combine_security_status(row), row[4], row[5], row[6], row[9]] for row in corp_rows]
-    _write_sheet(wb, "BONDS_GOV+CORP", bond_headers, gov_filtered + corp_filtered, numeric_cols={3, 4, 5})
+    gov_filtered = [[_combine_security_status(row), _coupon_rate(row[4]), row[5], row[6], row[9]] for row in gov_rows]
+    corp_filtered = [[_combine_security_status(row), _coupon_rate(row[4]), row[5], row[6], row[9]] for row in corp_rows]
+    _write_sheet(wb, "BONDS_GOV+CORP", bond_headers, gov_filtered + corp_filtered, numeric_cols={2, 3, 4, 5})
 
     # BONDS TRADES (best-effort, one row per bond - see docstring)
     trades_rows = _extract_bond_trades(gov_rows, corp_rows)
