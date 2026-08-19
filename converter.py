@@ -255,9 +255,7 @@ def _extract_bond_trades(gov_rows, corp_rows):
     return rows
 
 
-# --------------------------------------------------------------------------
 # Public entry point
-# --------------------------------------------------------------------------
 def convert(pdf_bytes: bytes, source_filename="", added_at=None) -> bytes:
     """Convert an RSE market report PDF into an .xlsx workbook with a master sheet."""
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
@@ -301,7 +299,7 @@ def convert(pdf_bytes: bytes, source_filename="", added_at=None) -> bytes:
     _write_sheet(wb, "EQUITIES MARKET", eq_headers, eq_filtered, numeric_cols={2, 3, 4})
 
     # BONDS_GOV+CORP
-    bond_headers = ["BOND", "COUPON RATE", "CLOSE. PRICE", "PREV. PRICE", "BOND TRADED"]
+    bond_headers = ["BOND", "COUPON RATE (%)", "CLOSE. PRICE", "PREV. PRICE", "BOND TRADED"]
     gov_filtered = [[_combine_security_status(row), _coupon_rate(row[4]), row[5], row[6], row[9]] for row in gov_rows]
     corp_filtered = [[_combine_security_status(row), _coupon_rate(row[4]), row[5], row[6], row[9]] for row in corp_rows]
     _write_sheet(wb, "BONDS_GOV+CORP", bond_headers, gov_filtered + corp_filtered, numeric_cols={2, 3, 4, 5})
