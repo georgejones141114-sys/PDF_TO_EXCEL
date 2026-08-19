@@ -68,6 +68,21 @@
       <button type="submit" class="submit-btn" id="submit-btn" disabled>Convert to Excel</button>
     </form>
 
+    {% if converted %}
+      <section class="result-actions" aria-label="Workbook actions">
+        <p class="result-actions__label">{{ converted.filename }} is ready</p>
+        <div class="result-actions__buttons">
+          <a class="action-btn action-btn--secondary" href="{{ url_for('download_converted', token=converted.token) }}">Download this workbook</a>
+          <form action="{{ url_for('add_to_master_route', token=converted.token) }}" method="post">
+            <button class="action-btn action-btn--primary" type="submit">Add to master sheet</button>
+          </form>
+          {% if master_available %}
+            <a class="action-btn action-btn--master" href="{{ url_for('download_master') }}">Download master workbook</a>
+          {% endif %}
+        </div>
+      </section>
+    {% endif %}
+
     <section class="sheets">
       <p class="sheets__label">Produces these sheets</p>
       <ol class="sheets__list">

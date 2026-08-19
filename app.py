@@ -1,10 +1,11 @@
 import io
 import os
+import uuid
 from datetime import datetime
 
-from flask import Flask, render_template, request, send_file, flash, redirect, url_for
+from flask import Flask, render_template, request, send_file, flash, redirect, url_for, session
 
-from converter import convert, ReportParseError
+from converter import add_to_master, convert, ReportParseError
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-secret-change-me")
@@ -12,10 +13,17 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-only-secret-change-me")
 MAX_CONTENT_LENGTH = 20 * 1024 * 1024  # 20 MB
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 
+pending_workbooks = {}
+master_workbooks = {}
+
 
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    return render_template(
+        "index.html",
+        converted=None,
+        master_available=session.get("master_id") in master_workbooks,
+    )
 
 
 @app.route("/convert", methods=["POST"])
@@ -33,7 +41,12 @@ def convert_route():
     pdf_bytes = file.read()
 
     try:
-        xlsx_bytes = convert(pdf_bytes)
+        added_at = datetime.now()
+        xlsx_bytes = convert(
+            pdf_bytes,
+            source_filename=file.filename,
+            added_at=added_at,
+        )
     except ReportParseError as e:
         flash(str(e))
         return redirect(url_for("index"))
@@ -41,12 +54,68 @@ def convert_route():
         flash("Something went wrong while converting this PDF. Please double-check the file and try again.")
         return redirect(url_for("index"))
 
-    out_name = os.path.splitext(file.filename)[0] + f"_{datetime.now().strftime('%Y%m%d')}.xlsx"
+    token = uuid.uuid4().hex
+    pending_workbooks[token] = {
+        "bytes": xlsx_bytes,
+        "filename": file.filename,
+        "added_at": added_at,
+    }
 
+    return render_template(
+        "index.html",
+        converted={"token": token, "filename": file.filename},
+        master_available=session.get("master_id") in master_workbooks,
+    )
+
+
+@app.route("/download/<token>", methods=["GET"])
+def download_converted(token):
+    workbook = pending_workbooks.get(token)
+    if workbook is None:
+        flash("That converted workbook is no longer available. Please convert the PDF again.")
+        return redirect(url_for("index"))
+    out_name = os.path.splitext(workbook["filename"])[0] + f"_{datetime.now().strftime('%Y%m%d')}.xlsx"
     return send_file(
-        io.BytesIO(xlsx_bytes),
+        io.BytesIO(workbook["bytes"]),
         as_attachment=True,
         download_name=out_name,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+@app.route("/add-to-master/<token>", methods=["POST"])
+def add_to_master_route(token):
+    workbook = pending_workbooks.get(token)
+    if workbook is None:
+        flash("That converted workbook is no longer available. Please convert the PDF again.")
+        return redirect(url_for("index"))
+
+    master_id = session.setdefault("master_id", uuid.uuid4().hex)
+    master_workbooks[master_id] = add_to_master(
+        master_workbooks.get(master_id),
+        workbook["bytes"],
+        workbook["filename"],
+        workbook["added_at"],
+    )
+    flash(f"{workbook['filename']} was added to your master workbook.")
+    return render_template(
+        "index.html",
+        converted={"token": token, "filename": workbook["filename"]},
+        master_available=True,
+    )
+
+
+@app.route("/download-master", methods=["GET"])
+def download_master():
+    master_id = session.get("master_id")
+    workbook = master_workbooks.get(master_id)
+    if workbook is None:
+        flash("Your master workbook is empty. Add a converted report first.")
+        return redirect(url_for("index"))
+    return send_file(
+        io.BytesIO(workbook),
+        as_attachment=True,
+        download_name=f"RSE_master_{datetime.now().strftime('%Y%m%d')}.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 

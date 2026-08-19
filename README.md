@@ -11,7 +11,12 @@ its text markers rather than hardcoded page numbers.
 
 ## What it produces
 
-One workbook, seven sheets:
+Each PDF is first converted into its own workbook. The result page lets the
+user download that workbook immediately or add its report sheets to a
+session-level master workbook. The master can be downloaded separately after
+one or more reports have been added.
+
+The individual workbook contains seven report sheets:
 
 | Sheet | Contents |
 |---|---|
@@ -43,7 +48,8 @@ pip install -r requirements.txt
 PORT=5001 python3 app.py
 ```
 
-Then open http://localhost:5001, drop in a PDF, and download the workbook.
+Then open http://localhost:5001, drop in a PDF, and choose whether to download
+the individual workbook or add it to the master workbook first.
 
 When you're done, leave the virtual environment with `deactivate`.
 

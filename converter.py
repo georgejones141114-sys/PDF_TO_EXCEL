@@ -27,6 +27,8 @@ version.
 
 import re
 import io
+from copy import copy
+from datetime import datetime
 from dataclasses import dataclass, field
 
 import pdfplumber
@@ -35,6 +37,7 @@ from openpyxl.styles import Font, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 
 # STYLING
+HEADER_FONT = Font(name="Calibri", bold=True, size=11)
 DATA_FONT = Font(name="Calibri", bold=False, size=10)
 THIN = Side(style="thin", color="808080")
 BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
@@ -252,8 +255,8 @@ def _extract_bond_trades(gov_rows, corp_rows):
 # --------------------------------------------------------------------------
 # Public entry point
 # --------------------------------------------------------------------------
-def convert(pdf_bytes: bytes) -> bytes:
-    """Convert an RSE market report PDF (as bytes) into an .xlsx workbook (as bytes)."""
+def convert(pdf_bytes: bytes, source_filename="", added_at=None) -> bytes:
+    """Convert an RSE market report PDF into an .xlsx workbook with a master sheet."""
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
         pages_text, all_lines = _extract_lines(pdf)
 
@@ -316,4 +319,72 @@ def convert(pdf_bytes: bytes) -> bytes:
 
     out = io.BytesIO()
     wb.save(out)
+    return out.getvalue()
+
+
+def add_to_master(master_bytes, report_bytes, source_filename, added_at=None):
+    """Add a converted report's sheets to a master workbook."""
+    added_at = added_at or datetime.now()
+
+    report_wb = openpyxl.load_workbook(io.BytesIO(report_bytes))
+    if master_bytes:
+        master_wb = openpyxl.load_workbook(io.BytesIO(master_bytes))
+    else:
+        master_wb = openpyxl.Workbook()
+        master_wb.active.title = "MASTER"
+        _write_sheet(master_wb, "MASTER LOG", [], [], numeric_cols=set())
+        del master_wb["MASTER LOG"]
+        master = master_wb["MASTER"]
+        for column, header in enumerate(["SPREADSHEET", "SOURCE PDF", "ADDED AT"], start=1):
+            cell = master.cell(row=1, column=column, value=header)
+            cell.font = HEADER_FONT
+            cell.border = BORDER
+            cell.fill = HEADER_FILL
+        master.freeze_panes = "A2"
+
+    master = master_wb["MASTER"]
+    row = master.max_row + 1
+    source_stem = re.sub(r"[^A-Za-z0-9]+", "_", source_filename.rsplit(".", 1)[0]).strip("_") or "Report"
+
+    for sheet in report_wb.worksheets:
+        if sheet.title == "MASTER":
+            continue
+        base_name = f"{source_stem} - {sheet.title}"[:31]
+        sheet_name = base_name
+        suffix = 2
+        while sheet_name in master_wb.sheetnames:
+            suffix_text = f" {suffix}"
+            sheet_name = f"{base_name[:31 - len(suffix_text)]}{suffix_text}"
+            suffix += 1
+
+        copied = master_wb.create_sheet(sheet_name)
+        copied.sheet_view.showGridLines = False
+        for source_row in sheet.iter_rows():
+            for source_cell in source_row:
+                target_cell = copied.cell(
+                    row=source_cell.row,
+                    column=source_cell.column,
+                    value=source_cell.value,
+                )
+                if source_cell.has_style:
+                    target_cell._style = copy(source_cell._style)
+                if source_cell.number_format:
+                    target_cell.number_format = source_cell.number_format
+        for column, dimension in sheet.column_dimensions.items():
+            copied.column_dimensions[column].width = dimension.width
+        copied.freeze_panes = sheet.freeze_panes
+
+        master.cell(row=row, column=1, value=sheet_name)
+        master.cell(row=row, column=2, value=source_filename)
+        master.cell(row=row, column=3, value=added_at)
+        for cell in master[row]:
+            cell.border = BORDER
+        master.cell(row=row, column=3).number_format = "yyyy-mm-dd hh:mm:ss"
+        row += 1
+
+    for column in range(1, 4):
+        master.column_dimensions[get_column_letter(column)].width = [35, 30, 22][column - 1]
+
+    out = io.BytesIO()
+    master_wb.save(out)
     return out.getvalue()

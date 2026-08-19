@@ -206,6 +206,48 @@ h1, .masthead__mark { font-family: 'Space Grotesk', sans-serif; }
   outline-offset: 2px;
 }
 
+/* ---------- post-conversion actions ---------- */
+.result-actions {
+  margin-top: 1.5rem;
+  border-left: 2px solid var(--mint);
+  padding: 0.1rem 0 0.1rem 1rem;
+}
+.result-actions__label {
+  margin: 0 0 0.75rem;
+  color: var(--mint);
+  font-size: 0.8rem;
+}
+.result-actions__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.action-btn {
+  display: inline-block;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.85rem;
+  color: var(--paper);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.action-btn--primary {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: var(--bg-deep);
+}
+.action-btn--secondary:hover,
+.action-btn--master:hover {
+  border-color: var(--mint);
+  color: var(--mint);
+}
+.action-btn--primary:hover {
+  background: var(--paper);
+}
+.result-actions form { margin: 0; }
+
 /* ---------- sheet list ---------- */
 .sheets {
   margin-top: 2.75rem;
