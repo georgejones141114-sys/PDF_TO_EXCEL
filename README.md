@@ -43,7 +43,7 @@ pip install -r requirements.txt
 python3 app.py
 ```
 
-Then open http://localhost:5000, drop in a PDF, and download the workbook.
+Then open http://localhost:5001, drop in a PDF, and download the workbook.
 
 When you're done, leave the virtual environment with `deactivate`.
 
