@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSE Report Converter</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <div class="ticker">
+    <div class="ticker__track">
+      <span>RSI 213.74&nbsp;&nbsp;+1.39</span>
+      <span>ALSI 259.11&nbsp;&nbsp;+0.40</span>
+      <span>BOK 660</span>
+      <span>BLR 515&nbsp;&nbsp;+10.00</span>
+      <span>KCB 500</span>
+      <span>EQTY 900</span>
+      <span>MTNR 135</span>
+      <span>NMG 1200</span>
+      <span>RHB 526</span>
+      <span>USL 104</span>
+      <span>IMR 99</span>
+      <span>CMR 165</span>
+      <!-- duplicate for seamless loop -->
+      <span>RSI 213.74&nbsp;&nbsp;+1.39</span>
+      <span>ALSI 259.11&nbsp;&nbsp;+0.40</span>
+      <span>BOK 660</span>
+      <span>BLR 515&nbsp;&nbsp;+10.00</span>
+      <span>KCB 500</span>
+      <span>EQTY 900</span>
+      <span>MTNR 135</span>
+      <span>NMG 1200</span>
+      <span>RHB 526</span>
+      <span>USL 104</span>
+      <span>IMR 99</span>
+      <span>CMR 165</span>
+    </div>
+  </div>
+
+  <main class="page">
+    <header class="masthead">
+      <div class="masthead__mark">RSE</div>
+      <div class="masthead__text">
+        <h1>Report&nbsp;Converter</h1>
+        <p class="eyebrow">PDF market report&nbsp;&rarr;&nbsp;structured .xlsx workbook</p>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="notice" role="alert">
+          {% for m in messages %}<p>{{ m }}</p>{% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form class="dropzone" id="dropzone" action="{{ url_for('convert_route') }}" method="post" enctype="multipart/form-data">
+      <input type="file" id="pdf_file" name="pdf_file" accept="application/pdf" hidden />
+
+      <div class="dropzone__inner" id="dropzone-inner">
+        <div class="dropzone__glyph">＋</div>
+        <p class="dropzone__title">Drop a market report PDF here</p>
+        <p class="dropzone__sub">or click to browse &mdash; one file, up to 20&nbsp;MB</p>
+        <p class="dropzone__filename" id="filename"></p>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submit-btn" disabled>Convert to Excel</button>
+    </form>
+
+    <section class="sheets">
+      <p class="sheets__label">Produces these sheets</p>
+      <ol class="sheets__list">
+        <li><span>01</span>Stock</li>
+        <li><span>02</span>Market stats</li>
+        <li><span>03</span>Exchange rate</li>
+        <li><span>04</span>Equities market</li>
+        <li><span>05</span>Bonds &mdash; gov + corp</li>
+        <li><span>06</span>Bonds trades</li>
+        <li><span>07</span>Weekly report</li>
+      </ol>
+    </section>
+
+    <footer class="page-footer">
+      <p>Built for Rwanda Stock Exchange daily/weekly market report PDFs. Layouts that differ significantly from the standard report template may not parse correctly.</p>
+    </footer>
+  </main>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const inner = document.getElementById('dropzone-inner');
+    const input = document.getElementById('pdf_file');
+    const filenameEl = document.getElementById('filename');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function showFile(file) {
+      if (!file) return;
+      filenameEl.textContent = file.name;
+      submitBtn.disabled = false;
+      dropzone.classList.add('dropzone--has-file');
+    }
+
+    inner.addEventListener('click', () => input.click());
+    input.addEventListener('change', () => showFile(input.files[0]));
+
+    ['dragenter', 'dragover'].forEach(evt =>
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dropzone--drag');
+      })
+    );
+    ['dragleave', 'drop'].forEach(evt =>
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dropzone--drag');
+      })
+    );
+    dropzone.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        input.files = e.dataTransfer.files;
+        showFile(file);
+      }
+    });
+
+    dropzone.addEventListener('submit', () => {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Converting…';
+    });
+  </script>
+</body>
+</html>
