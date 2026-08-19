@@ -34,11 +34,7 @@ import openpyxl
 from openpyxl.styles import Font, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 
-
-# --------------------------------------------------------------------------
-# Styling
-# --------------------------------------------------------------------------
-HEADER_FONT = Font(name="Calibri", bold=True, size=11)
+# STYLING
 DATA_FONT = Font(name="Calibri", bold=False, size=10)
 THIN = Side(style="thin", color="808080")
 BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
@@ -97,9 +93,7 @@ def _combine_security_status(row):
     return f"{security} ({status})" if status else security
 
 
-# --------------------------------------------------------------------------
-# Extraction
-# --------------------------------------------------------------------------
+# EXTRACTION
 ISIN_RE = re.compile(r"^(RW[0-9A-Z]{8,}|KE[0-9A-Z]{8,}|ZAE[0-9A-Z]{8,}|MGMRW|PRERW|AMSRW)\s")
 EQUITY_ROW_RE = re.compile(r"^(RW|KE|ZAE)\w+ [A-Z]+ ")
 WEEKLY_ROW_RE = re.compile(r"^(\d\d-|TOTAL)")
