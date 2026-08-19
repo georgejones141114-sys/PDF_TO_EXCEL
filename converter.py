@@ -12,10 +12,6 @@ produces a styled Excel (.xlsx) workbook with one sheet per data table:
     BONDS TRADES     - bonds that actually traded today (best-effort, see note)
     WEEKLY REPORT    - this week's daily volume / value / deals
 
-This is a direct generalisation of the original PDF_to_Excel.py script:
-instead of relying on fixed page numbers, it locates each section by its
-text markers, so it keeps working if the report gains/loses a page or two
-in a future layout tweak.
 
 NOTE on "BONDS TRADES": the source PDF only reports a *total* traded
 volume per bond for the day, not a deal-by-deal breakdown. The original
