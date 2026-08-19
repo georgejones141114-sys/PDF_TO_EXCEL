@@ -40,7 +40,7 @@ cd rse-pdf-to-excel
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python3 app.py
+PORT=5001 python3 app.py
 ```
 
 Then open http://localhost:5001, drop in a PDF, and download the workbook.
