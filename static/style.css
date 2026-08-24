@@ -294,8 +294,7 @@ h1, .masthead__mark { font-family: 'Space Grotesk', sans-serif; }
 .sheet-tab--active { border-bottom-color: var(--gold); }
 .sheet-panel--hidden { display: none; }
 .sheet-table-wrap {
-  height: min(62vh, 680px);
-  min-height: 360px;
+  max-height: min(62vh, 680px);
   overflow: auto;
 }
 .sheet-table {
