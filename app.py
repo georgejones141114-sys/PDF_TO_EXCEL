@@ -18,14 +18,19 @@ pending_workbooks = {}
 master_workbooks = {}
 
 
-def workbook_preview(workbook_bytes, max_rows=20, max_columns=8):
+def workbook_preview(workbook_bytes, max_rows=100):
     workbook = openpyxl.load_workbook(io.BytesIO(workbook_bytes), read_only=True, data_only=True)
     sheets = []
     for worksheet in workbook.worksheets:
         rows = []
-        for row in worksheet.iter_rows(min_row=1, max_row=max_rows, max_col=max_columns, values_only=True):
-            rows.append(["" if value is None else str(value) for value in row])
-        sheets.append({"name": worksheet.title, "rows": rows})
+        for row in worksheet.iter_rows(min_row=1, max_row=max_rows, values_only=True):
+            values = ["" if value is None else str(value) for value in row]
+            while values and values[-1] == "":
+                values.pop()
+            rows.append(values)
+        column_count = max((len(row) for row in rows), default=0)
+        rows = [row + [""] * (column_count - len(row)) for row in rows]
+        sheets.append({"name": worksheet.title, "rows": rows, "column_count": column_count})
     workbook.close()
     return sheets
 

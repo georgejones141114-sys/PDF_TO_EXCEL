@@ -86,7 +86,7 @@
         <div class="workbook-preview__heading">
           <div>
             <p class="sheets__label">Workbook preview</p>
-            <p class="workbook-preview__hint">Showing the first 20 rows of each sheet</p>
+            <p class="workbook-preview__hint">Showing the first 100 rows of each sheet</p>
           </div>
           <span class="workbook-preview__badge">{{ converted.preview|length }} sheets</span>
         </div>
@@ -98,14 +98,15 @@
         {% for sheet in converted.preview %}
           <div class="sheet-panel{% if not loop.first %} sheet-panel--hidden{% endif %}" id="sheet-panel-{{ loop.index }}" role="tabpanel" data-sheet-panel="{{ loop.index }}">
             <div class="sheet-table-wrap">
-              <table class="sheet-table">
-                {% for row in sheet.rows %}
-                  {% if loop.first %}
-                    <thead><tr>{% for cell in row %}<th scope="col">{{ cell }}</th>{% endfor %}</tr></thead>
-                  {% else %}
-                    <tbody><tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr></tbody>
-                  {% endif %}
-                {% endfor %}
+              <table class="sheet-table" style="--sheet-columns: {{ sheet.column_count }}">
+                {% if sheet.rows %}
+                  <thead><tr>{% for cell in sheet.rows[0] %}<th scope="col">{{ cell }}</th>{% endfor %}</tr></thead>
+                  <tbody>
+                    {% for row in sheet.rows[1:] %}
+                      <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+                    {% endfor %}
+                  </tbody>
+                {% endif %}
               </table>
             </div>
           </div>

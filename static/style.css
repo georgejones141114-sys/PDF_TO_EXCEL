@@ -60,7 +60,7 @@ h1, .masthead__mark { font-family: 'Space Grotesk', sans-serif; }
 
 /* ---------- layout ---------- */
 .page {
-  max-width: 640px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 3.5rem 1.5rem 4rem;
 }
@@ -293,10 +293,14 @@ h1, .masthead__mark { font-family: 'Space Grotesk', sans-serif; }
 .sheet-tab:hover, .sheet-tab--active { color: var(--paper); }
 .sheet-tab--active { border-bottom-color: var(--gold); }
 .sheet-panel--hidden { display: none; }
-.sheet-table-wrap { overflow-x: auto; max-height: 430px; }
+.sheet-table-wrap {
+  height: min(62vh, 680px);
+  min-height: 360px;
+  overflow: auto;
+}
 .sheet-table {
-  width: 100%;
-  min-width: 560px;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   font-size: 0.7rem;
   text-align: left;
