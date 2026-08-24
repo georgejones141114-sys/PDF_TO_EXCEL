@@ -81,6 +81,36 @@
           {% endif %}
         </div>
       </section>
+
+      <section class="workbook-preview" aria-label="Workbook preview">
+        <div class="workbook-preview__heading">
+          <div>
+            <p class="sheets__label">Workbook preview</p>
+            <p class="workbook-preview__hint">Showing the first 20 rows of each sheet</p>
+          </div>
+          <span class="workbook-preview__badge">{{ converted.preview|length }} sheets</span>
+        </div>
+        <div class="sheet-tabs" role="tablist" aria-label="Workbook sheets">
+          {% for sheet in converted.preview %}
+            <button class="sheet-tab{% if loop.first %} sheet-tab--active{% endif %}" type="button" role="tab" aria-selected="{{ 'true' if loop.first else 'false' }}" aria-controls="sheet-panel-{{ loop.index }}" data-sheet-tab="{{ loop.index }}">{{ sheet.name }}</button>
+          {% endfor %}
+        </div>
+        {% for sheet in converted.preview %}
+          <div class="sheet-panel{% if not loop.first %} sheet-panel--hidden{% endif %}" id="sheet-panel-{{ loop.index }}" role="tabpanel" data-sheet-panel="{{ loop.index }}">
+            <div class="sheet-table-wrap">
+              <table class="sheet-table">
+                {% for row in sheet.rows %}
+                  {% if loop.first %}
+                    <thead><tr>{% for cell in row %}<th scope="col">{{ cell }}</th>{% endfor %}</tr></thead>
+                  {% else %}
+                    <tbody><tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr></tbody>
+                  {% endif %}
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+        {% endfor %}
+      </section>
     {% endif %}
 
     <section class="sheets">
@@ -141,6 +171,20 @@
     dropzone.addEventListener('submit', () => {
       submitBtn.disabled = true;
       submitBtn.textContent = 'Converting…';
+    });
+
+    document.querySelectorAll('[data-sheet-tab]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const selectedSheet = tab.dataset.sheetTab;
+        document.querySelectorAll('[data-sheet-tab]').forEach(item => {
+          const isSelected = item === tab;
+          item.classList.toggle('sheet-tab--active', isSelected);
+          item.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        });
+        document.querySelectorAll('[data-sheet-panel]').forEach(panel => {
+          panel.classList.toggle('sheet-panel--hidden', panel.dataset.sheetPanel !== selectedSheet);
+        });
+      });
     });
   </script>
 </body>

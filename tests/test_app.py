@@ -22,6 +22,9 @@ def test_convert_route_offers_optional_workbook_actions():
     assert response.status_code == 200
     assert "Download this workbook" in response.text
     assert "Add to master sheet" in response.text
+    assert "Workbook preview" in response.text
+    assert "STOCK" in response.text
+    assert "BOK" in response.text
     assert "Content-Disposition" not in response.headers
 
     token = re.search(r"/download/([a-f0-9]+)", response.text).group(1)

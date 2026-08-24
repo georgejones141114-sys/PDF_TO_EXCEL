@@ -3,6 +3,7 @@ import os
 import uuid
 from datetime import datetime
 
+import openpyxl
 from flask import Flask, render_template, request, send_file, flash, redirect, url_for, session
 
 from converter import add_to_master, convert, ReportParseError
@@ -15,6 +16,18 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 
 pending_workbooks = {}
 master_workbooks = {}
+
+
+def workbook_preview(workbook_bytes, max_rows=20, max_columns=8):
+    workbook = openpyxl.load_workbook(io.BytesIO(workbook_bytes), read_only=True, data_only=True)
+    sheets = []
+    for worksheet in workbook.worksheets:
+        rows = []
+        for row in worksheet.iter_rows(min_row=1, max_row=max_rows, max_col=max_columns, values_only=True):
+            rows.append(["" if value is None else str(value) for value in row])
+        sheets.append({"name": worksheet.title, "rows": rows})
+    workbook.close()
+    return sheets
 
 
 @app.route("/", methods=["GET"])
@@ -63,7 +76,11 @@ def convert_route():
 
     return render_template(
         "index.html",
-        converted={"token": token, "filename": file.filename},
+        converted={
+            "token": token,
+            "filename": file.filename,
+            "preview": workbook_preview(xlsx_bytes),
+        },
         master_available=session.get("master_id") in master_workbooks,
     )
 
@@ -100,7 +117,11 @@ def add_to_master_route(token):
     flash(f"{workbook['filename']} was added to your master workbook.")
     return render_template(
         "index.html",
-        converted={"token": token, "filename": workbook["filename"]},
+        converted={
+            "token": token,
+            "filename": workbook["filename"],
+            "preview": workbook_preview(workbook["bytes"]),
+        },
         master_available=True,
     )
 

@@ -248,6 +248,75 @@ h1, .masthead__mark { font-family: 'Space Grotesk', sans-serif; }
 }
 .result-actions form { margin: 0; }
 
+/* ---------- workbook preview ---------- */
+.workbook-preview {
+  margin-top: 2.25rem;
+  border: 1px solid var(--line);
+  background: rgba(244, 239, 225, 0.04);
+}
+.workbook-preview__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1rem 0.8rem;
+}
+.workbook-preview__heading .sheets__label { margin-bottom: 0.35rem; }
+.workbook-preview__hint {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.7rem;
+}
+.workbook-preview__badge {
+  color: var(--gold);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+.sheet-tabs {
+  display: flex;
+  gap: 0.2rem;
+  overflow-x: auto;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 0.45rem 0.65rem 0;
+}
+.sheet-tab {
+  flex: 0 0 auto;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--ink-dim);
+  font: 0.7rem 'IBM Plex Mono', monospace;
+  padding: 0.55rem 0.55rem 0.65rem;
+  cursor: pointer;
+}
+.sheet-tab:hover, .sheet-tab--active { color: var(--paper); }
+.sheet-tab--active { border-bottom-color: var(--gold); }
+.sheet-panel--hidden { display: none; }
+.sheet-table-wrap { overflow-x: auto; max-height: 430px; }
+.sheet-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 0.7rem;
+  text-align: left;
+}
+.sheet-table th, .sheet-table td {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 0.6rem 0.65rem;
+  white-space: nowrap;
+}
+.sheet-table th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-deep);
+  color: var(--gold);
+  font-weight: 600;
+}
+.sheet-table td { color: var(--ink); }
+.sheet-table tbody tr:hover td { background: rgba(127, 227, 180, 0.05); }
+
 /* ---------- sheet list ---------- */
 .sheets {
   margin-top: 2.75rem;
