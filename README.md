@@ -4,8 +4,7 @@ A tiny web app: upload a Rwanda Stock Exchange market report PDF, get back a
 styled `.xlsx` workbook with the equities, bonds, weekly report, and market
 stats tables already parsed out into clean sheets.
 
-It's a Flask wrapper around the same extraction logic as the original
-`PDF_to_Excel.py` script, generalized to work directly from an uploaded PDF
+It's a Flask wrapper, generalized to work directly from an uploaded PDF
 (no pre-existing template workbook required) and to locate each section by
 its text markers rather than hardcoded page numbers.
 
